@@ -1,5 +1,14 @@
-# Temporal Starter Project - Go
+# Test
 
-A simple Temporal project to start from.
+A repro repo for testing setting a custom Workflow ID in a test environment using
 
-I use this repo with [this script](https://gist.github.com/afitz0/6d5b22d7490f66cf82cc54fda62bb009) to quickly be able to start a new Temporal project from scratch.
+```go
+env.SetStartWorkflowOptions(client.StartWorkflowOptions{
+    ID: "custom-workflow-id",
+})
+```
+
+and then trying to `SignalWorkflowByID` using that ID.
+
+Expected: `go test` passes.
+Actual: `go test` fails with "Received unexpected error: Workflow custom-workflow-id not exists"

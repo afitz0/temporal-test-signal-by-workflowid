@@ -1,28 +1,25 @@
-package starter
+package testing
 
 import (
-	"time"
-
 	"go.temporal.io/sdk/workflow"
 )
 
-func Workflow(ctx workflow.Context, greeting string, name string) (string, error) {
-	ao := workflow.ActivityOptions{
-		StartToCloseTimeout: 10 * time.Second,
-	}
-	ctx = workflow.WithActivityOptions(ctx, ao)
-
+func Workflow(ctx workflow.Context) error {
 	logger := workflow.GetLogger(ctx)
-	logger.Info("Starter workflow started", "greeting", greeting, "name", name)
+	logger.Info("Workflow started.")
 
-	var a *Activities
-	var result string
-	err := workflow.ExecuteActivity(ctx, a.Activity, greeting, name).Get(ctx, &result)
-	if err != nil {
-		logger.Error("Activity failed.", "Error", err)
-		return "", err
+	cancelled := false
+	selector := workflow.NewSelector(ctx)
+	selector.AddReceive(workflow.GetSignalChannel(ctx, "cancel"),
+		func(c workflow.ReceiveChannel, _ bool) {
+			c.Receive(ctx, nil)
+			cancelled = true
+		})
+
+	for !cancelled {
+		selector.Select(ctx)
 	}
 
-	logger.Info("Starter workflow completed.", "result", result)
-	return result, nil
+	logger.Info("Workflow completed.")
+	return nil
 }
