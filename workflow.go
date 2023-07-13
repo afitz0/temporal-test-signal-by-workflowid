@@ -6,7 +6,8 @@ import (
 
 func Workflow(ctx workflow.Context) error {
 	logger := workflow.GetLogger(ctx)
-	logger.Info("Workflow started.")
+	info := workflow.GetInfo(ctx)
+	logger.Info("Workflow started.", "WorkflowID", info.WorkflowExecution.ID)
 
 	cancelled := false
 	selector := workflow.NewSelector(ctx)
